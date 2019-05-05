@@ -615,7 +615,6 @@ export default class extends Component {
 	}
 
 	renderScrollView = pages => {
-		console.warn('Platform.OS: ' + Platform.OS)
 		if (Platform.OS == 'ios') {
 			return (
 				<ScrollView ref={this.refScrollView}
