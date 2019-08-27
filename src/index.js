@@ -4,7 +4,7 @@
  */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Text, View, ScrollView, Dimensions, TouchableOpacity, ViewPagerAndroid, Platform, ActivityIndicator } from 'react-native'
+import { Text, View, ViewPropTypes, ScrollView, Dimensions, TouchableOpacity, ViewPagerAndroid, Platform, ActivityIndicator } from 'react-native'
 
 /**
  * Default styles
@@ -558,32 +558,40 @@ export default class extends Component {
 			</View>)
 			: null
 	}
-
+	prevNextButton(num) {
+		this.scrollBy(num)
+	}
 	renderNextButton = () => {
 		let button = null
-		const { width, } = Dimensions.get('window')
 		if (this.props.loop ||
 			this.state.index !== this.state.total - 1) {
-			button = this.props.nextButton || <Text style={styles.buttonText}></Text>
+			button = this.props.nextButton || <Text style={styles.buttonText}>›</Text>
 		}
 
 		return (
-			<TouchableOpacity activeOpacity={1} onPress={() => button !== null && this.scrollBy(1)} disabled={this.props.disableNextButton}>
-				<View style={{ width: (width - 20) / 3, flex: 1 }}>{button}</View>
+			<TouchableOpacity
+				onPress={() => button !== null && this.scrollBy(1)}
+				disabled={this.props.disableNextButton}
+			>
+				<View>
+					{button}
+				</View>
 			</TouchableOpacity>
 		)
 	}
 
 	renderPrevButton = () => {
 		let button = null
-		const { width, } = Dimensions.get('window')
+
 		if (this.props.loop || this.state.index !== 0) {
-			button = this.props.prevButton || <Text style={styles.buttonText}></Text>
+			button = this.props.prevButton || <Text style={styles.buttonText}>‹</Text>
 		}
 
 		return (
-			<TouchableOpacity activeOpacity={1} onPress={() => button !== null && this.scrollBy(-1)}>
-				<View style={{ width: (width - 20) / 3, flex: 1 }}>{button}</View>
+			<TouchableOpacity onPress={() => button !== null && this.scrollBy(-1)}>
+				<View>
+					{button}
+				</View>
 			</TouchableOpacity>
 		)
 	}
