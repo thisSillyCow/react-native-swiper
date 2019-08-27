@@ -4,7 +4,7 @@
  */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Text, View, ViewPropTypes, ScrollView, Dimensions, TouchableOpacity, ViewPagerAndroid, Platform, ActivityIndicator } from 'react-native'
+import { Text, View, ScrollView, Dimensions, TouchableOpacity, ViewPagerAndroid, Platform, ActivityIndicator } from 'react-native'
 
 /**
  * Default styles
@@ -304,7 +304,11 @@ export default class extends Component {
 	 * Automatic rolling
 	 */
 	autoplay = () => {
-		if (!Array.isArray(this.props.children) || !this.props.autoplay || this.internals.isScrolling || this.state.autoplayEnd) { return; }
+		if (!Array.isArray(this.props.children) ||
+			!this.props.autoplay ||
+			this.internals.isScrolling ||
+			this.state.autoplayEnd) return
+
 		this.autoplayTimer && clearTimeout(this.autoplayTimer)
 		this.autoplayTimer = setTimeout(() => {
 			if (!this.props.loop && (
@@ -313,6 +317,7 @@ export default class extends Component {
 					: this.state.index === 0
 			)
 			) return this.setState({ autoplayEnd: true })
+
 			this.scrollBy(this.props.autoplayDirection ? 1 : -1)
 		}, this.props.autoplayTimeout * 1000)
 	}
@@ -334,6 +339,7 @@ export default class extends Component {
 	onScrollEnd = e => {
 		// update scroll state
 		this.internals.isScrolling = false
+
 		// making our events coming from android compatible to updateIndex logic
 		if (!e.nativeEvent.contentOffset) {
 			if (this.state.dir === 'x') {
@@ -342,9 +348,11 @@ export default class extends Component {
 				e.nativeEvent.contentOffset = { y: e.nativeEvent.position * this.state.height }
 			}
 		}
+
 		this.updateIndex(e.nativeEvent.contentOffset, this.state.dir, () => {
 			this.autoplay()
 			this.loopJump()
+
 			// if `onMomentumScrollEnd` registered will be called here
 			this.props.onMomentumScrollEnd && this.props.onMomentumScrollEnd(e, this.fullState(), this)
 		})
@@ -376,10 +384,12 @@ export default class extends Component {
 	updateIndex = (offset, dir, cb) => {
 		const state = this.state
 		let index = state.index
-		if (!this.internals.offset) { this.internals.offset = {} }  // Android not setting this onLayout first? https://github.com/leecade/react-native-swiper/issues/582
-		const diff = offset[dir] - (this.internals.offset[dir] || Dimensions.get('window').width)
+		if (!this.internals.offset)   // Android not setting this onLayout first? https://github.com/leecade/react-native-swiper/issues/582
+			this.internals.offset = {}
+		const diff = offset[dir] - this.internals.offset[dir]
 		const step = dir === 'x' ? state.width : state.height
 		let loopJump = false
+
 		// Do nothing if offset no change.
 		if (!diff) return
 
@@ -407,8 +417,6 @@ export default class extends Component {
 		this.internals.offset = offset
 
 		// only update offset in state if loopJump is true
-
-
 		if (loopJump) {
 			// when swiping to the beginning of a looping set for the third time,
 			// the new offset will be the same as the last one set in state.
@@ -553,36 +561,29 @@ export default class extends Component {
 
 	renderNextButton = () => {
 		let button = null
-
+		const { width, } = Dimensions.get('window')
 		if (this.props.loop ||
 			this.state.index !== this.state.total - 1) {
-			button = this.props.nextButton || <Text style={styles.buttonText}>›</Text>
+			button = this.props.nextButton || <Text style={styles.buttonText}></Text>
 		}
 
 		return (
-			<TouchableOpacity
-				onPress={() => button !== null && this.scrollBy(1)}
-				disabled={this.props.disableNextButton}
-			>
-				<View>
-					{button}
-				</View>
+			<TouchableOpacity activeOpacity={1} onPress={() => button !== null && this.scrollBy(1)} disabled={this.props.disableNextButton}>
+				<View style={{ width: (width - 20) / 3, flex: 1 }}>{button}</View>
 			</TouchableOpacity>
 		)
 	}
 
 	renderPrevButton = () => {
 		let button = null
-
+		const { width, } = Dimensions.get('window')
 		if (this.props.loop || this.state.index !== 0) {
-			button = this.props.prevButton || <Text style={styles.buttonText}>‹</Text>
+			button = this.props.prevButton || <Text style={styles.buttonText}></Text>
 		}
 
 		return (
-			<TouchableOpacity onPress={() => button !== null && this.scrollBy(-1)}>
-				<View>
-					{button}
-				</View>
+			<TouchableOpacity activeOpacity={1} onPress={() => button !== null && this.scrollBy(-1)}>
+				<View style={{ width: (width - 20) / 3, flex: 1 }}>{button}</View>
 			</TouchableOpacity>
 		)
 	}
@@ -615,7 +616,7 @@ export default class extends Component {
 	}
 
 	renderScrollView = pages => {
-		if (Platform.OS == 'ios') {
+		if (Platform.OS === 'ios') {
 			return (
 				<ScrollView ref={this.refScrollView}
 					{...this.props}
@@ -709,14 +710,15 @@ export default class extends Component {
 		} else {
 			pages = <View style={pageStyle} key={0}>{children}</View>
 		}
+
 		return (
 			<View style={[styles.container, containerStyle]} onLayout={this.onLayout}>
 				{this.renderScrollView(pages)}
 				{showsPagination && (renderPagination
 					? renderPagination(index, total, this)
 					: this.renderPagination())}
-				{/* {this.renderTitle()}
-				{showsButtons && this.renderButtons()} */}
+				{this.renderTitle()}
+				{showsButtons && this.renderButtons()}
 			</View>
 		)
 	}
