@@ -4,7 +4,17 @@
  */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Text, View, ViewPropTypes, ScrollView, Dimensions, TouchableOpacity, ViewPagerAndroid, Platform, ActivityIndicator } from 'react-native'
+import {
+	Text,
+	View,
+	ViewPropTypes,
+	ScrollView,
+	Dimensions,
+	TouchableOpacity,
+	ViewPagerAndroid,
+	Platform,
+	ActivityIndicator
+} from 'react-native'
 
 /**
  * Default styles
@@ -386,8 +396,10 @@ export default class extends Component {
 		let index = state.index
 		if (!this.internals.offset)   // Android not setting this onLayout first? https://github.com/leecade/react-native-swiper/issues/582
 			this.internals.offset = {}
-		const diff = offset[dir] - this.internals.offset[dir]
-		const step = dir === 'x' ? state.width : state.height
+		// const diff = offset[dir] - this.internals.offset[dir]
+		// const step = dir === 'x' ? state.width : state.height
+		const diff = (offset[dir] || 0) - (this.internals.offset[dir] || 0)
+		const step = (dir === 'x' ? state.width : state.height) || 0
 		let loopJump = false
 
 		// Do nothing if offset no change.
@@ -405,6 +417,10 @@ export default class extends Component {
 				loopJump = true
 			} else if (index >= state.total) {
 				index = 0
+				offset[dir] = step
+				loopJump = true
+			} else if (index == 39) {
+				index = 0;
 				offset[dir] = step
 				loopJump = true
 			}
@@ -558,11 +574,10 @@ export default class extends Component {
 			</View>)
 			: null
 	}
-	prevNextButton(num) {
-		this.scrollBy(num)
-	}
+
 	renderNextButton = () => {
 		let button = null
+
 		if (this.props.loop ||
 			this.state.index !== this.state.total - 1) {
 			button = this.props.nextButton || <Text style={styles.buttonText}>›</Text>
